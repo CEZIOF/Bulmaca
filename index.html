@@ -5,74 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zor Bulmaca 💖</title>
 <style>
-body { 
-  font-family: Arial,sans-serif; 
-  text-align:center; 
-  margin:0; 
-  padding:0; 
-  background:#c8a2c8; 
-  transition:background 1s ease-in-out; 
-  background-size:cover; 
-  background-position:center;
-}
-h1 { 
-  color:#fff; 
-  margin-top:20px; 
-  font-size:7vw; 
-  text-shadow:1px 1px 2px #a64ca6;
-}
-p { 
-  color:#fff; 
-  font-size:5vw; 
-  margin:10px;
-}
-#puzzle { 
-  display:grid; 
-  grid-template-columns:repeat(4, minmax(60px,1fr)); 
-  gap:10px; 
-  justify-content:center; 
-  margin:20px auto; 
-  width:90vw; 
-  max-width:420px;
-}
-.tile { 
-  aspect-ratio:1/1; 
-  background:#e0b3e0; 
-  display:flex; 
-  justify-content:center; 
-  align-items:center; 
-  font-size:9vw; 
-  color:white; 
-  cursor:pointer; 
-  border-radius:12px; 
-  transition:0.3s; 
-  box-shadow:0 4px 6px rgba(0,0,0,0.2);
-}
-.tile img { 
-  width:100%; 
-  height:100%; 
-  border-radius:12px; 
-  display:none;
-}
-.hidden { 
-  background:#d8a2d8; 
-  color:#d8a2d8; 
-  cursor:pointer;
-}
-#message { 
-  margin-top:15px; 
-  font-size:8vw; 
-  color:#fff; 
-  font-weight:bold; 
-  text-shadow:0 0 10px #ff66b2,0 0 20px #ff99cc; 
-  opacity:0; 
-  animation:none;
-}
-@keyframes blink {
-  0% {opacity:1;text-shadow:0 0 20px #ff66b2,0 0 40px #ff99cc,0 0 60px #fff;}
-  50% {opacity:0.3;text-shadow:0 0 10px #ff66b2;}
-  100% {opacity:1;text-shadow:0 0 20px #ff66b2,0 0 40px #ff99cc,0 0 60px #fff;}
-}
+body { font-family: Arial,sans-serif; text-align:center; margin:0; padding:0; background:#c8a2c8; transition:background 1s ease-in-out; background-size:cover; background-position:center;}
+h1 { color:#fff; margin-top:20px; font-size:7vw; text-shadow:1px 1px 2px #a64ca6;}
+p { color:#fff; font-size:5vw; margin:10px;}
+#puzzle { display:grid; grid-template-columns:repeat(4, minmax(60px,1fr)); gap:10px; justify-content:center; margin:20px auto; width:90vw; max-width:420px;}
+.tile { aspect-ratio:1/1; background:#e0b3e0; display:flex; justify-content:center; align-items:center; font-size:9vw; color:white; cursor:pointer; border-radius:12px; transition:0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.2);}
+.tile img { width:100%; height:100%; border-radius:12px; display:none;}
+.hidden { background:#d8a2d8; color:#d8a2d8; cursor:pointer;}
+#message { margin-top:15px; font-size:8vw; color:#fff; font-weight:bold; text-shadow:0 0 10px #ff66b2,0 0 20px #ff99cc; opacity:0; animation:none;}
+@keyframes blink {0% {opacity:1;text-shadow:0 0 20px #ff66b2,0 0 40px #ff99cc,0 0 60px #fff;}50% {opacity:0.3;text-shadow:0 0 10px #ff66b2;}100% {opacity:1;text-shadow:0 0 20px #ff66b2,0 0 40px #ff99cc,0 0 60px #fff;}}
 .blink { animation:blink 1.2s infinite; }
 </style>
 </head>
@@ -83,21 +24,16 @@ p {
 <div id="puzzle"></div>
 <div id="message"></div>
 
+<audio id="song" src="sarkim.mp3" preload="auto"></audio>
+
 <script>
 const puzzle=document.getElementById('puzzle');
 const message=document.getElementById('message');
+const song=document.getElementById('song');
 
-// 4x4 bulmaca: sen ve kızın fotoğrafı bir eş
-const values=[
-  '💌','💌','🌹','🌹','💖','💖','⭐','⭐',
-  '🌙','🌙','🎶','🎶','ben.jpg','kiz.jpg','🐻','🐻'
-];
+const values=['💌','💌','🌹','🌹','💖','💖','⭐','⭐','🌙','🌙','🎶','🎶','ben.jpg','kiz.jpg','🐻','🐻'];
+let tiles=[], firstTile=null, lock=false;
 
-let tiles=[];
-let firstTile=null;
-let lock=false;
-
-// Shuffle
 function shuffle(array){
   for(let i=array.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
@@ -105,34 +41,28 @@ function shuffle(array){
   }
 }
 
-// Kutucukları oluştur
 shuffle(values);
 for(let val of values){
   const tile=document.createElement('div');
   tile.className='tile hidden';
   tile.dataset.value=val;
-
   if(val.endsWith('.jpg')){
     const img=document.createElement('img');
-    img.src=val; // aynı klasördeki fotoğraf
+    img.src=val;
     tile.appendChild(img);
-  } else {
-    tile.textContent=val;
-  }
-
+  } else tile.textContent=val;
   tile.addEventListener('click',flipTile);
   puzzle.appendChild(tile);
   tiles.push(tile);
 }
 
-// Başlangıçta tüm kutucukları göster ve 2 sn sonra gizle
+// Başlangıçta tüm kutucukları göster, 2 sn sonra gizle
 tiles.forEach(t=>{
   const img=t.querySelector('img');
   if(img) img.style.display='block';
   else t.textContent=t.dataset.value;
   t.classList.remove('hidden');
 });
-
 setTimeout(()=>{
   tiles.forEach(t=>{
     const img=t.querySelector('img');
@@ -144,11 +74,9 @@ setTimeout(()=>{
 
 function flipTile(){
   if(lock || !this.classList.contains('hidden')) return;
-
   const img=this.querySelector('img');
   if(img) img.style.display='block';
   else this.textContent=this.dataset.value;
-
   this.classList.remove('hidden');
 
   if(!firstTile){ firstTile=this; return; }
@@ -157,9 +85,7 @@ function flipTile(){
   setTimeout(()=>{
     let match=false;
     const photoPair=['ben.jpg','kiz.jpg'];
-
-    if(firstTile.dataset.value===this.dataset.value || 
-       (photoPair.includes(firstTile.dataset.value) && photoPair.includes(this.dataset.value))) match=true;
+    if(firstTile.dataset.value===this.dataset.value || (photoPair.includes(firstTile.dataset.value) && photoPair.includes(this.dataset.value))) match=true;
 
     if(!match){
       [firstTile,this].forEach(t=>{
@@ -187,10 +113,19 @@ function flipTile(){
       message.classList.add('blink');
       message.style.opacity='1';
       document.body.style.backgroundImage="url('OMRUM.jpg')";
+
+      // Şarkıyı çal
+      song.play().catch(e=>{
+        console.log("Tarayıcı otomatik çalmayı engelledi, tıklayınca çalacak.");
+      });
     }
   },800);
 }
-</script>
 
+// Kullanıcı etkileşimi ile şarkıyı başlat
+document.body.addEventListener('click', ()=>{ 
+  if(song.paused) song.play();
+});
+</script>
 </body>
 </html>
