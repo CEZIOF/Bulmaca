@@ -5,7 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zor Bulmaca 💖</title>
 <style>
-body { font-family: Arial,sans-serif; text-align:center; margin:0; padding:0; background:#c8a2c8; transition:background 1s ease-in-out; background-size:cover; background-position:center;}
+body { 
+  font-family: Arial,sans-serif; 
+  text-align:center; 
+  margin:0; 
+  padding:0; 
+  background:#c8a2c8; 
+  transition:background 1s ease-in-out; 
+  background-size:cover; 
+  background-position:center;
+}
 h1 { color:#fff; margin-top:20px; font-size:7vw; text-shadow:1px 1px 2px #a64ca6;}
 p { color:#fff; font-size:5vw; margin:10px;}
 #puzzle { display:grid; grid-template-columns:repeat(4, minmax(60px,1fr)); gap:10px; justify-content:center; margin:20px auto; width:90vw; max-width:420px;}
@@ -15,6 +24,17 @@ p { color:#fff; font-size:5vw; margin:10px;}
 #message { margin-top:15px; font-size:8vw; color:#fff; font-weight:bold; text-shadow:0 0 10px #ff66b2,0 0 20px #ff99cc; opacity:0; animation:none;}
 @keyframes blink {0% {opacity:1;text-shadow:0 0 20px #ff66b2,0 0 40px #ff99cc,0 0 60px #fff;}50% {opacity:0.3;text-shadow:0 0 10px #ff66b2;}100% {opacity:1;text-shadow:0 0 20px #ff66b2,0 0 40px #ff99cc,0 0 60px #fff;}}
 .blink { animation:blink 1.2s infinite; }
+#playButton {
+  display:none;
+  margin-top:20px;
+  padding:15px 30px;
+  font-size:5vw;
+  border:none;
+  border-radius:12px;
+  background:#ff66b2;
+  color:#fff;
+  cursor:pointer;
+}
 </style>
 </head>
 <body>
@@ -23,23 +43,19 @@ p { color:#fff; font-size:5vw; margin:10px;}
 <p>Eşlerini bulabilecek misin? 😍</p>
 <div id="puzzle"></div>
 <div id="message"></div>
-
+<button id="playButton">🎵 Müziği Çal</button>
 <audio id="song" src="sarkim.mp3" preload="auto"></audio>
 
 <script>
 const puzzle=document.getElementById('puzzle');
 const message=document.getElementById('message');
+const playButton=document.getElementById('playButton');
 const song=document.getElementById('song');
 
 const values=['💌','💌','🌹','🌹','💖','💖','⭐','⭐','🌙','🌙','🎶','🎶','ben.jpg','kiz.jpg','🐻','🐻'];
-let tiles=[], firstTile=null, lock=false;
+let tiles=[]; let firstTile=null; let lock=false;
 
-function shuffle(array){
-  for(let i=array.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [array[i],array[j]]=[array[j],array[i]];
-  }
-}
+function shuffle(array){for(let i=array.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]];}}
 
 shuffle(values);
 for(let val of values){
@@ -56,75 +72,38 @@ for(let val of values){
   tiles.push(tile);
 }
 
-// Başlangıçta tüm kutucukları göster, 2 sn sonra gizle
-tiles.forEach(t=>{
-  const img=t.querySelector('img');
-  if(img) img.style.display='block';
-  else t.textContent=t.dataset.value;
-  t.classList.remove('hidden');
-});
-setTimeout(()=>{
-  tiles.forEach(t=>{
-    const img=t.querySelector('img');
-    if(img) img.style.display='none';
-    else t.textContent='';
-    t.classList.add('hidden');
-  });
-},2000);
+// Başlangıçta göster ve 2 sn sonra gizle
+tiles.forEach(t=>{ const img=t.querySelector('img'); if(img) img.style.display='block'; else t.textContent=t.dataset.value; t.classList.remove('hidden'); });
+setTimeout(()=>{ tiles.forEach(t=>{ const img=t.querySelector('img'); if(img) img.style.display='none'; else t.textContent=''; t.classList.add('hidden'); }); },2000);
 
 function flipTile(){
   if(lock || !this.classList.contains('hidden')) return;
   const img=this.querySelector('img');
-  if(img) img.style.display='block';
-  else this.textContent=this.dataset.value;
+  if(img) img.style.display='block'; else this.textContent=this.dataset.value;
   this.classList.remove('hidden');
-
   if(!firstTile){ firstTile=this; return; }
-
   lock=true;
   setTimeout(()=>{
-    let match=false;
-    const photoPair=['ben.jpg','kiz.jpg'];
+    let match=false; const photoPair=['ben.jpg','kiz.jpg'];
     if(firstTile.dataset.value===this.dataset.value || (photoPair.includes(firstTile.dataset.value) && photoPair.includes(this.dataset.value))) match=true;
-
-    if(!match){
-      [firstTile,this].forEach(t=>{
-        const i=t.querySelector('img');
-        if(i) i.style.display='none';
-        else t.textContent='';
-        t.classList.add('hidden');
-      });
-    } else{
-      firstTile.style.background='#ff66b2';
-      this.style.background='#ff66b2';
-    }
-
-    firstTile=null;
-    lock=false;
-
-    // Oyun bitti mi?
-    if(tiles.every(t=>{
-      const i=t.querySelector('img');
-      if(i) return i.style.display==='block';
-      return !t.classList.contains('hidden');
-    })){
+    if(!match){ [firstTile,this].forEach(t=>{ const i=t.querySelector('img'); if(i) i.style.display='none'; else t.textContent=''; t.classList.add('hidden'); }); }
+    else{ firstTile.style.background='#ff66b2'; this.style.background='#ff66b2'; }
+    firstTile=null; lock=false;
+    if(tiles.every(t=>{ const i=t.querySelector('img'); if(i) return i.style.display==='block'; return !t.classList.contains('hidden'); })){
       puzzle.style.display='none';
       message.textContent="🎉 AFFERİN ÖMRÜME SENİ ÇOK ÇOK SEVİYORUM SEN BENİM EŞİMSİN 💖";
       message.classList.add('blink');
       message.style.opacity='1';
       document.body.style.backgroundImage="url('OMRUM.jpg')";
-
-      // Şarkıyı çal
-      song.play().catch(e=>{
-        console.log("Tarayıcı otomatik çalmayı engelledi, tıklayınca çalacak.");
-      });
+      playButton.style.display='inline-block'; // butonu göster
     }
   },800);
 }
 
-// Kullanıcı etkileşimi ile şarkıyı başlat
-document.body.addEventListener('click', ()=>{ 
-  if(song.paused) song.play();
+// Butona tıklandığında müzik çal
+playButton.addEventListener('click', ()=>{
+  song.play();
+  playButton.style.display='none';
 });
 </script>
 </body>
